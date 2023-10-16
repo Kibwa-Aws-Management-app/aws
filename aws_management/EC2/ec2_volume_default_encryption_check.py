@@ -17,4 +17,6 @@ for volume in response['Volumes']:
     is_default_encryption = volume['KmsKeyId'] == "alias/aws/ebs"
 
     if is_default_encryption:
-        print(f"[PASS] EBS 볼륨 {volume_id}는 기본 암호화가
+        print(f"[PASS] EBS 볼륨 {volume_id}는 기본 암호화가 활성화되어 있습니다.")
+else:
+print(f"[FAIL] EBS 볼륨 {volume_id}는 기본 암호화가 비활성화되어 있습니다.")
