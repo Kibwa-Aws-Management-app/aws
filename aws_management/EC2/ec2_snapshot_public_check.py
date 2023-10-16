@@ -17,6 +17,6 @@ for snapshot in response['Snapshots']:
     is_public = snapshot['Public']
 
     if is_public:
-        print(f"[PASS] EBS 스냅샷 {snapshot_id}는 공개되어 있습니다.")
+        print(f"[FAIL] EBS 스냅샷 {snapshot_id}는 공개되어 있습니다.")
     else:
-        print(f"[FAIL] EBS 스냅샷 {snapshot_id}는 비공개입니다.")
+        print(f"[PASS] EBS 스냅샷 {snapshot_id}는 비공개입니다.")
