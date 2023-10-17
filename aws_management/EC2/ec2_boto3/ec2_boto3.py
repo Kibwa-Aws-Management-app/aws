@@ -1,0 +1,117 @@
+import boto3
+import shodan
+
+
+# AWS Elastic IP 주소 확인
+def check_elastic_ip(shodan_api_key, elastic_ip):
+    try:
+        # Shodan API 초기화
+        shodan_api = shodan.Shodan(shodan_api_key)
+
+        # Shodan에서 Elastic IP 주소 확인
+        result = shodan_api.host(elastic_ip)
+
+        # Elastic IP 주소가 Shodan에 확인되면 False 반환
+        return False
+    except shodan.APIERROR as e:
+        if e.value == "No information available for that IP.":
+            # Elastic IP 주소가 Shodan에 확인되지 않으면 True 반환
+            return True
+        else:
+            # 다른 오류 처리
+            return "ERROR"
+
+
+# Elastic IP 주소 할당 확인
+def check_elastic_ip_assignment(ec2, elastic_ip):
+    try:
+        response = ec2.describe_addresses(PublicIps=[elastic_ip])
+        if response['Addresses']:
+            # Elastic IP 주소가 할당되면 True 반환
+            return True
+        else:
+            # Elastic IP 주소가 할당되지 않으면 False 반환
+            return False
+    except Exception as e:
+        return "ERROR"
+
+
+# EC2 인스턴스 상세 모니터링 확인
+def check_instance_detailed_monitoring(ec2, instance_id):
+    try:
+        response = ec2.describe_instance_attribute(
+            InstanceId=instance_id, Attribute='instanceMonitoring')
+        if response['InstanceMonitoring']['State'] == 'enabled':
+            # 상세 모니터링이 활성화되면 True 반환
+            return True
+        else:
+            # 상세 모니터링이 비활성화되면 False 반환
+            return False
+    except Exception as e:
+        return "ERROR"
+
+
+# EC2 인스턴스 IMDSv2 확인
+def check_instance_imdsv2(ec2, instance_id):
+    try:
+        response = ec2.describe_instance_attribute(
+            InstanceId=instance_id, Attribute='sriovNetSupport')
+        if response['SriovNetSupport']['Value'] == 'simple':
+            # IMDSv2가 활성화되면 True 반환
+            return True
+        else:
+            # IMDSv2가 비활성화되면 False 반환
+            return False
+    except Exception as e:
+        return "ERROR"
+
+
+# EC2 인스턴스의 인터넷 통신 가능여부와 프로파일 설정 여부 확인
+def check_instance_internet_and_profile(ec2, instance_id):
+    try:
+        response = ec2.describe_instances(InstanceIds=[instance_id])
+        instance = response['Reservations'][0]['Instances'][0]
+        internet_accessible = instance['SourceDestCheck']
+        iam_profile = instance.get('IamInstanceProfile', None)
+
+        if internet_accessible and iam_profile:
+            # 인터넷 통신 가능하고 프로파일이 설정되면 True 반환
+            return True
+        else:
+            # 하나라도 설정 안되었으면 False 반환
+            return False
+    except Exception as e:
+        return "ERROR"
+
+
+# Shodan API 키 설정
+shodan_api_key = 'your_shodan_api_key'
+
+# Elastic IP 주소, EC2 인스턴스 ID 및 AWS 리전 설정
+elastic_ip = 'your_elastic_ip_address'
+instance_id = 'your_ec2_instance_id'
+aws_region = 'your_aws_region'
+
+# AWS Boto3 클라이언트 초기화
+ec2 = boto3.client('ec2', region_name=aws_region)
+
+# Elastic IP 주소 확인
+elastic_ip_result = check_elastic_ip(shodan_api_key, elastic_ip)
+print(f"Elastic IP 주소 확인: {elastic_ip_result}")
+
+# Elastic IP 주소 할당 확인
+elastic_ip_assignment_result = check_elastic_ip_assignment(ec2, elastic_ip)
+print(f"Elastic IP 주소 할당 확인: {elastic_ip_assignment_result}")
+
+# EC2 인스턴스 상세 모니터링 확인
+detailed_monitoring_result = check_instance_detailed_monitoring(
+    ec2, instance_id)
+print(f"EC2 인스턴스 상세 모니터링 확인: {detailed_monitoring_result}")
+
+# EC2 인스턴스 IMDSv2 확인
+imdsv2_result = check_instance_imdsv2(ec2, instance_id)
+print(f"EC2 인스턴스 IMDSv2 확인: {imdsv2_result}")
+
+# EC2 인스턴스의 인터넷 통신 가능여부와 프로파일 설정 여부 확인
+internet_profile_result = check_instance_internet_and_profile(ec2, instance_id)
+print(f"EC2 인스턴스 인터넷 및 프로파일 확인: {internet_profile_result}")
