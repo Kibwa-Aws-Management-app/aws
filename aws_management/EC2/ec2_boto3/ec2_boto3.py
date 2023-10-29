@@ -116,8 +116,7 @@ check_elastic_ip_assignment(ec2, elastic_ip)
 
 
 # EC2 인스턴스 상세 모니터링 확인
-check_instance_detailed_monitoring(
-    ec2, instance_id)
+check_instance_detailed_monitoring(ec2, instance_id)
 
 
 # EC2 인스턴스 IMDSv2 확인
