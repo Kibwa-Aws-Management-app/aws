@@ -169,6 +169,22 @@ ul, li, a{
     display: flex;
 }
 
+#check-btn{
+    margin: auto;
+    margin-left: 100px;
+    color: white;
+    font-size: 20px;
+    background-color: rgb(255, 68, 0);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+}
+
+#check-btn:hover{
+    background-color: rgb(255, 68, 0, 0.8);
+    cursor: pointer;
+}
+
 .security-table{
     /* 5*9 테이블 */
     /* display: grid; */
